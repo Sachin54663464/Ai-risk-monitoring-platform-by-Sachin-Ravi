@@ -1,0 +1,745 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- ── PAGE HEADER ──────────────────────────────────────────────────── -->
+<div class="flex items-center justify-between mb-6 animate-in">
+    <div>
+        <h1 class="page-title">Investigations</h1>
+        <p class="page-subtitle">Monitor and review suspicious user activity</p>
+    </div>
+    <div class="flex items-center gap-2">
+        <div class="topbar-chip">
+            <span class="dot"></span>
+            Auto-scanning
+        </div>
+        <button class="btn btn-danger btn-sm" data-loading="1400">
+            ⚠ Flag All
+        </button>
+        <button class="btn btn-primary btn-sm" data-loading="1600">
+            ⤓ Export
+        </button>
+    </div>
+</div>
+
+<!-- ── SUMMARY CHIPS ────────────────────────────────────────────────── -->
+<div class="flex items-center gap-2 mb-6 animate-in delay-1">
+
+    <div class="summary-chip chip-red">
+        <span class="chip-dot" style="background:#f87171;"></span>
+        Suspicious users flagged
+    </div>
+
+    <div class="summary-chip chip-amber">
+        <span class="chip-dot" style="background:#fbbf24;"></span>
+        Pending review
+    </div>
+
+    <div class="summary-chip chip-green">
+        <span class="chip-dot" style="background:#34d399;"></span>
+        Reviewed &amp; cleared
+    </div>
+
+</div>
+
+<!-- ── USERS TABLE ───────────────────────────────────────────────────── -->
+{% if suspicious_users %}
+<div class="animate-in delay-2" style="margin-bottom:32px;">
+
+    <div class="flex items-center justify-between mb-3">
+        <span class="section-title">Suspicious Users</span>
+        <span style="font-size:12px; color:var(--text-muted);">
+            Click <strong style="color:var(--text-secondary); font-weight:500;">◈ Risk</strong>
+            to load the trend chart below
+        </span>
+    </div>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Trust Score</th>
+                    <th>Status</th>
+                    <th>Review State</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="users-tbody">
+                {% for user in suspicious_users %}
+                <tr class="user-row" id="user-row-{{ user.id }}"
+                    data-userid="{{ user.id }}"
+                    data-username="{{ user.username }}">
+
+                    <!-- Username -->
+                    <td>
+                        <div class="flex items-center gap-2">
+                            <div class="user-avatar">
+                                {{ user.username|first|upper }}
+                            </div>
+                            <div>
+                                <div class="user-name">{{ user.username }}</div>
+                                <div class="user-id-label">#{{ user.id }}</div>
+                            </div>
+                        </div>
+                    </td>
+
+                    <!-- Trust score -->
+                    <td>
+                        <div class="trust-score-cell">
+                            <div class="trust-bar-track">
+                                <div class="trust-bar-fill"
+                                     data-score="{{ user.trust_score }}"
+                                     style="
+                                        width:0%;
+                                        background:{% if user.trust_score < 40 %}var(--red){% elif user.trust_score < 70 %}var(--amber){% else %}var(--green){% endif %};
+                                     "></div>
+                            </div>
+                            <span class="trust-score-value
+                                {% if user.trust_score < 40 %}trust-red
+                                {% elif user.trust_score < 70 %}trust-amber
+                                {% else %}trust-green{% endif %}">
+                                {{ user.trust_score }}
+                            </span>
+                        </div>
+                    </td>
+
+                    <!-- Status -->
+                    <td>
+                        {% if user.is_suspicious %}
+                            <span class="badge badge-danger">⚠ Suspicious</span>
+                        {% else %}
+                            <span class="badge badge-success">✓ Normal</span>
+                        {% endif %}
+                    </td>
+
+                    <!-- Review state -->
+                    <td>
+                        {% if user.is_reviewed %}
+                            <span class="badge badge-success">✓ Reviewed</span>
+                        {% else %}
+                            <span class="badge badge-warning">⏳ Pending</span>
+                        {% endif %}
+                    </td>
+
+                    <!-- Actions -->
+                    <td>
+                        <div class="flex items-center gap-2">
+                            <a href="/review/{{ user.id }}/"
+                               class="btn btn-secondary btn-sm">
+                                Review
+                            </a>
+                            <a href="/toggle/{{ user.id }}/"
+                               class="btn btn-ghost btn-sm"
+                               style="border:1px solid var(--border);">
+                                Toggle
+                            </a>
+                            <button
+                                class="btn btn-primary btn-sm risk-btn"
+                                id="risk-btn-{{ user.id }}"
+                                data-userid="{{ user.id }}"
+                                data-username="{{ user.username }}"
+                                onclick="loadRisk({{ user.id }}, '{{ user.username }}')">
+                                ◈ Risk
+                            </button>
+                        </div>
+                    </td>
+
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Row count -->
+    <div class="flex items-center justify-between mt-3"
+         style="padding:0 4px;">
+        <span style="font-size:12px; color:var(--text-muted);">
+            {{ suspicious_users|length }} user{{ suspicious_users|length|pluralize }} flagged
+        </span>
+        <span style="font-size:12px; color:var(--text-muted);">
+            Sorted by risk level
+        </span>
+    </div>
+
+</div>
+
+{% else %}
+
+<!-- ── EMPTY STATE ───────────────────────────────────────────────────── -->
+<div class="card animate-in delay-2 empty-state">
+    <div class="empty-icon">🛡️</div>
+    <p class="empty-title">No suspicious users detected</p>
+    <p class="empty-sub">
+        All monitored accounts are currently within normal behaviour thresholds.
+    </p>
+</div>
+
+{% endif %}
+
+<!-- ── RISK TREND CHART ──────────────────────────────────────────────── -->
+<div class="card animate-in delay-3" id="chart-card"
+     style="padding:0; overflow:hidden;">
+
+    <!-- Chart header -->
+    <div class="flex items-center justify-between" style="
+        padding:16px 20px;
+        border-bottom:1px solid var(--border);
+        background:rgba(255,255,255,0.012);
+    ">
+        <div class="flex items-center gap-3">
+            <span class="section-title">Risk Trend</span>
+            <span class="badge badge-neutral" id="chart-user-label">
+                No user selected
+            </span>
+        </div>
+        <div class="flex items-center gap-2">
+            <span class="chart-subtitle" id="chart-subtitle">
+                Select a user above to load their risk history
+            </span>
+            <button onclick="clearChart()"
+                    class="btn btn-ghost btn-sm"
+                    style="border:1px solid var(--border); font-size:11px;">
+                ✕ Clear
+            </button>
+        </div>
+    </div>
+
+    <!-- Chart body -->
+    <div class="chart-body" id="chart-body">
+
+        <!-- Loading overlay -->
+        <div class="loading-overlay" id="chart-loading">
+            <div>
+                <div class="spinner"></div>
+                <p style="
+                    font-size:12px;
+                    color:var(--text-muted);
+                    margin-top:12px;
+                    text-align:center;
+                ">Loading risk data…</p>
+            </div>
+        </div>
+
+        <!-- Empty placeholder -->
+        <div class="chart-placeholder" id="chart-placeholder">
+            <div class="chart-placeholder-icon">◈</div>
+            <p class="chart-placeholder-text">
+                Click <strong>◈ Risk</strong> on any user to visualise their
+                risk severity over time
+            </p>
+        </div>
+
+        <!-- Canvas (hidden until data loads) -->
+        <canvas id="riskChart" style="display:none;"></canvas>
+
+    </div>
+
+</div>
+
+<!-- ── PAGE STYLES ───────────────────────────────────────────────────── -->
+<style>
+
+    /* ── Summary chips ───────────────────────── */
+    .summary-chip {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        border-radius: var(--radius-full);
+        font-size: 12px;
+        font-weight: 500;
+        transition: var(--transition);
+        cursor: default;
+        user-select: none;
+    }
+
+    .summary-chip:hover { filter: brightness(1.12); transform: translateY(-1px); }
+
+    .chip-dot {
+        width: 5px; height: 5px;
+        border-radius: 50%;
+        display: inline-block;
+        flex-shrink: 0;
+    }
+
+    .chip-red   { background: rgba(239,68,68,0.08);  border: 1px solid rgba(239,68,68,0.16);  color: #f87171; }
+    .chip-amber { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.16); color: #fbbf24; }
+    .chip-green { background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.16); color: #34d399; }
+
+    /* ── User avatar ─────────────────────────── */
+    .user-avatar {
+        width: 28px; height: 28px;
+        border-radius: 50%;
+        background: linear-gradient(135deg,
+            rgba(59,130,246,0.28),
+            rgba(139,92,246,0.28));
+        border: 1px solid rgba(255,255,255,0.08);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--text-primary);
+        flex-shrink: 0;
+        transition: transform var(--t-base) var(--ease-spring),
+                    box-shadow var(--t-base) var(--ease-out);
+    }
+
+    .user-row:hover .user-avatar {
+        transform: scale(1.1);
+        box-shadow: 0 0 10px rgba(59,130,246,0.25);
+    }
+
+    .user-name {
+        font-weight: 500;
+        color: var(--text-primary);
+        font-size: 13px;
+        line-height: 1.3;
+    }
+
+    .user-id-label {
+        font-size: 10.5px;
+        color: var(--text-muted);
+        font-family: 'JetBrains Mono', monospace;
+        margin-top: 1px;
+    }
+
+    /* ── Trust score bar ─────────────────────── */
+    .trust-score-cell {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .trust-bar-track {
+        width: 56px;
+        height: 4px;
+        background: var(--bg-elevated);
+        border-radius: var(--radius-full);
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+
+    .trust-bar-fill {
+        height: 100%;
+        border-radius: var(--radius-full);
+        width: 0%;
+        transition: width 0.7s var(--ease-smooth);
+    }
+
+    .trust-score-value {
+        font-size: 12px;
+        font-weight: 700;
+        font-family: 'Syne', sans-serif;
+        min-width: 22px;
+    }
+
+    .trust-red   { color: #f87171; }
+    .trust-amber { color: #fbbf24; }
+    .trust-green { color: #34d399; }
+
+    /* ── Table row interactions ──────────────── */
+    .user-row {
+        transition:
+            background  var(--t-fast) var(--ease-out),
+            box-shadow  var(--t-fast) var(--ease-out),
+            transform   var(--t-fast) var(--ease-out);
+    }
+
+    .user-row:hover { transform: translateX(1px); }
+
+    tr.risk-active {
+        background: rgba(59,130,246,0.065) !important;
+        box-shadow: inset 3px 0 0 var(--accent),
+                    inset 0 0 0 1px rgba(59,130,246,0.12) !important;
+    }
+
+    tr.risk-active .risk-btn {
+        background: var(--accent-bright) !important;
+        box-shadow: 0 0 14px rgba(59,130,246,0.38) !important;
+    }
+
+    /* ── Chart body ──────────────────────────── */
+    .chart-body {
+        padding: 24px;
+        position: relative;
+        min-height: 280px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .chart-subtitle {
+        font-size: 11.5px;
+        color: var(--text-muted);
+    }
+
+    /* ── Chart placeholder ───────────────────── */
+    .chart-placeholder {
+        text-align: center;
+        padding: 32px 24px;
+        animation: fade-in 0.3s var(--ease-out) both;
+    }
+
+    .chart-placeholder-icon {
+        font-size: 32px;
+        color: var(--text-muted);
+        opacity: 0.4;
+        margin-bottom: 14px;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50%       { transform: translateY(-5px); }
+    }
+
+    .chart-placeholder-text {
+        font-size: 13px;
+        color: var(--text-muted);
+        max-width: 300px;
+        margin: 0 auto;
+        line-height: 1.6;
+    }
+
+    .chart-placeholder-text strong {
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+
+    /* ── Canvas fade-in ──────────────────────── */
+    #riskChart {
+        animation: chart-reveal 0.5s var(--ease-out) both;
+        width: 100% !important;
+    }
+
+    @keyframes chart-reveal {
+        from { opacity: 0; transform: translateY(8px) scale(0.99); }
+        to   { opacity: 1; transform: translateY(0)  scale(1); }
+    }
+
+    /* ── Loading overlay ─────────────────────── */
+    .loading-overlay {
+        position: absolute;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: rgba(7,9,15,0.75);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+        z-index: 10;
+        border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    }
+
+    .loading-overlay.visible { display: flex; }
+
+    /* ── Empty state ─────────────────────────── */
+    .empty-state {
+        padding: 64px 24px;
+        text-align: center;
+        margin-bottom: 32px;
+    }
+
+    .empty-icon {
+        font-size: 40px;
+        margin-bottom: 16px;
+        opacity: 0.35;
+        animation: float 3.5s ease-in-out infinite;
+    }
+
+    .empty-title {
+        font-family: 'Syne', sans-serif;
+        font-size: 16px;
+        font-weight: 650;
+        color: var(--text-primary);
+        margin-bottom: 6px;
+        letter-spacing: -0.02em;
+    }
+
+    .empty-sub {
+        font-size: 13px;
+        color: var(--text-muted);
+        line-height: 1.6;
+        max-width: 380px;
+        margin: 0 auto;
+    }
+
+</style>
+
+<!-- ── CHART.JS ──────────────────────────────────────────────────────── -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+(function () {
+    'use strict';
+
+    let chart = null;
+    let activeUserId = null;
+
+    /* ── Animate trust bars on load ─────────────────────────────── */
+    function animateTrustBars() {
+        document.querySelectorAll('.trust-bar-fill').forEach((bar, i) => {
+            const score = parseFloat(bar.dataset.score) || 0;
+            setTimeout(() => {
+                bar.style.width = score + '%';
+            }, 200 + i * 60);
+        });
+    }
+
+    /* ── Risk button loading state ──────────────────────────────── */
+    function setRiskBtnLoading(userId, loading) {
+        const btn = document.getElementById('risk-btn-' + userId);
+        if (!btn) return;
+        if (loading) {
+            btn.disabled = true;
+            btn.innerHTML = `
+                <span style="
+                    display:inline-block;
+                    width:10px; height:10px;
+                    border:1.5px solid rgba(255,255,255,0.25);
+                    border-top-color:#fff;
+                    border-radius:50%;
+                    animation:spin 0.65s linear infinite;
+                "></span>
+                Loading
+            `;
+        } else {
+            btn.disabled = false;
+            btn.innerHTML = '◈ Risk';
+        }
+    }
+
+    /* ── Load risk data ─────────────────────────────────────────── */
+    window.loadRisk = function (userId, username) {
+
+        // Clear previous active row
+        document.querySelectorAll('.user-row')
+            .forEach(r => r.classList.remove('risk-active'));
+
+        // Highlight new active row
+        const row = document.getElementById('user-row-' + userId);
+        if (row) {
+            row.classList.add('risk-active');
+            // Smooth scroll to keep row visible
+            row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        activeUserId = userId;
+
+        // Update chart header
+        const labelEl = document.getElementById('chart-user-label');
+        labelEl.textContent = username || ('User #' + userId);
+        labelEl.className   = 'badge badge-info';
+
+        document.getElementById('chart-subtitle').textContent = 'Fetching data…';
+
+        // Show spinner on button + overlay
+        setRiskBtnLoading(userId, true);
+        showLoading(true);
+        hidePlaceholder();
+
+        // Scroll chart card into view
+        const chartCard = document.getElementById('chart-card');
+        setTimeout(() => {
+            chartCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 120);
+
+        fetch(`/risk/${userId}/`)
+            .then(r => r.json())
+            .then(data => {
+                showLoading(false);
+                setRiskBtnLoading(userId, false);
+                document.getElementById('chart-subtitle').textContent =
+                    data.risk_history.length + ' data points loaded';
+                renderChart(data);
+            })
+            .catch(() => {
+                showLoading(false);
+                setRiskBtnLoading(userId, false);
+                document.getElementById('chart-subtitle').textContent =
+                    'Failed to load — check console';
+                showPlaceholder();
+            });
+    };
+
+    /* ── Render chart ───────────────────────────────────────────── */
+    function renderChart(data) {
+        const canvas = document.getElementById('riskChart');
+
+        // Reset animation by replacing canvas
+        const parent = canvas.parentNode;
+        const newCanvas = canvas.cloneNode(false);
+        parent.replaceChild(newCanvas, canvas);
+        newCanvas.style.display = 'block';
+
+        const ctx = newCanvas.getContext('2d');
+
+        if (chart) { chart.destroy(); chart = null; }
+
+        // Dual gradient fill
+        const grad = ctx.createLinearGradient(0, 0, 0, 240);
+        grad.addColorStop(0,    'rgba(239,68,68,0.28)');
+        grad.addColorStop(0.55, 'rgba(239,68,68,0.07)');
+        grad.addColorStop(1,    'rgba(239,68,68,0)');
+
+        chart = new Chart(newCanvas, {
+            type: 'line',
+            data: {
+                labels: data.risk_history.map((_, i) => 'T' + (i + 1)),
+                datasets: [{
+                    label: `Risk Severity — ${data.username}`,
+                    data: data.risk_history,
+                    borderColor: '#f87171',
+                    borderWidth: 2,
+                    pointBackgroundColor: '#f87171',
+                    pointBorderColor: '#07090f',
+                    pointBorderWidth: 2.5,
+                    pointRadius: 4,
+                    pointHoverRadius: 7,
+                    pointHoverBackgroundColor: '#fca5a5',
+                    pointHoverBorderColor: '#07090f',
+                    backgroundColor: grad,
+                    fill: true,
+                    tension: 0.42
+                }]
+            },
+            options: {
+                responsive: true,
+                animation: {
+                    duration: 600,
+                    easing: 'easeOutQuart',
+                    // Animate drawing left-to-right
+                    x: { duration: 600, from: 0 }
+                },
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#8896aa',
+                            font: { family: 'DM Sans', size: 12 },
+                            boxWidth: 14,
+                            boxHeight: 2,
+                            padding: 16
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: '#0f1623',
+                        borderColor: 'rgba(255,255,255,0.07)',
+                        borderWidth: 1,
+                        titleColor: '#eef2f7',
+                        bodyColor: '#8896aa',
+                        padding: 12,
+                        cornerRadius: 10,
+                        displayColors: true,
+                        boxWidth: 8,
+                        boxHeight: 8,
+                        titleFont: {
+                            family: 'Syne',
+                            size: 12,
+                            weight: '700'
+                        },
+                        bodyFont: {
+                            family: 'DM Sans',
+                            size: 12
+                        },
+                        callbacks: {
+                            label: ctx =>
+                                `  Severity: ${ctx.parsed.y} / 5`
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            color: 'rgba(255,255,255,0.028)',
+                            drawBorder: false
+                        },
+                        ticks: {
+                            color: '#424f62',
+                            font: { family: 'DM Sans', size: 11 }
+                        },
+                        border: { display: false }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        max: 5,
+                        grid: {
+                            color: 'rgba(255,255,255,0.038)',
+                            drawBorder: false
+                        },
+                        ticks: {
+                            color: '#424f62',
+                            font: { family: 'DM Sans', size: 11 },
+                            stepSize: 1,
+                            callback: v => v + ' / 5'
+                        },
+                        border: { display: false }
+                    }
+                }
+            }
+        });
+    }
+
+    /* ── Clear chart ────────────────────────────────────────────── */
+    window.clearChart = function () {
+        if (chart) { chart.destroy(); chart = null; }
+
+        document.querySelectorAll('.user-row')
+            .forEach(r => r.classList.remove('risk-active'));
+
+        // Reset all risk buttons
+        if (activeUserId) setRiskBtnLoading(activeUserId, false);
+        activeUserId = null;
+
+        const labelEl = document.getElementById('chart-user-label');
+        labelEl.textContent = 'No user selected';
+        labelEl.className   = 'badge badge-neutral';
+
+        document.getElementById('chart-subtitle').textContent =
+            'Select a user above to load their risk history';
+
+        // Hide canvas, show placeholder
+        const canvas = document.getElementById('riskChart');
+        canvas.style.display = 'none';
+
+        showPlaceholder();
+    };
+
+    /* ── Helpers ────────────────────────────────────────────────── */
+    function showLoading(visible) {
+        const el = document.getElementById('chart-loading');
+        if (visible) {
+            el.classList.add('visible');
+        } else {
+            el.classList.remove('visible');
+        }
+    }
+
+    function hidePlaceholder() {
+        const el = document.getElementById('chart-placeholder');
+        if (el) {
+            el.style.transition = 'opacity 0.15s ease';
+            el.style.opacity = '0';
+            setTimeout(() => el.style.display = 'none', 150);
+        }
+    }
+
+    function showPlaceholder() {
+        const el = document.getElementById('chart-placeholder');
+        if (el) {
+            el.style.display = 'block';
+            el.style.opacity = '0';
+            requestAnimationFrame(() => {
+                el.style.transition = 'opacity 0.25s ease';
+                el.style.opacity = '1';
+            });
+        }
+    }
+
+    /* ── Init ───────────────────────────────────────────────────── */
+    animateTrustBars();
+
+})();
+</script>
+
+{% endblock %}

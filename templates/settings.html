@@ -1,0 +1,477 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- ── PAGE HEADER ──────────────────────────────────────────────────── -->
+<div class="flex items-center justify-between mb-6 animate-in">
+    <div>
+        <h1 class="page-title">Settings</h1>
+        <p style="font-size:13px; color:var(--text-muted); margin-top:4px; font-weight:400;">
+            System configuration and preferences
+        </p>
+    </div>
+    <div class="flex items-center gap-2">
+        <button class="btn btn-secondary" style="font-size:12px; padding:6px 14px;">
+            ↺ &nbsp;Reset Defaults
+        </button>
+        <button class="btn btn-primary" style="font-size:12px; padding:6px 14px;">
+            ✓ &nbsp;Save Changes
+        </button>
+    </div>
+</div>
+
+<!-- ── SETTINGS NAV TABS ─────────────────────────────────────────────── -->
+<div class="flex items-center gap-1 mb-6 animate-in delay-1"
+     style="border-bottom:1px solid var(--border);">
+
+    <button onclick="switchTab(this,'general')" class="settings-tab tab-active"
+        style="padding:8px 16px; border:none; background:transparent;
+               font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500;
+               cursor:pointer; border-bottom:2px solid var(--accent);
+               color:var(--text-primary); transition:all 0.15s ease;
+               margin-bottom:-1px; white-space:nowrap;">General</button>
+
+    <button onclick="switchTab(this,'monitoring')" class="settings-tab"
+        style="padding:8px 16px; border:none; background:transparent;
+               font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500;
+               cursor:pointer; border-bottom:2px solid transparent;
+               color:var(--text-muted); transition:all 0.15s ease;
+               margin-bottom:-1px; white-space:nowrap;">Monitoring</button>
+
+    <button onclick="switchTab(this,'notifications')" class="settings-tab"
+        style="padding:8px 16px; border:none; background:transparent;
+               font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500;
+               cursor:pointer; border-bottom:2px solid transparent;
+               color:var(--text-muted); transition:all 0.15s ease;
+               margin-bottom:-1px; white-space:nowrap;">Notifications</button>
+
+    <button onclick="switchTab(this,'security')" class="settings-tab"
+        style="padding:8px 16px; border:none; background:transparent;
+               font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500;
+               cursor:pointer; border-bottom:2px solid transparent;
+               color:var(--text-muted); transition:all 0.15s ease;
+               margin-bottom:-1px; white-space:nowrap;">Security</button>
+
+    <button onclick="switchTab(this,'advanced')" class="settings-tab"
+        style="padding:8px 16px; border:none; background:transparent;
+               font-family:'DM Sans',sans-serif; font-size:13px; font-weight:500;
+               cursor:pointer; border-bottom:2px solid transparent;
+               color:var(--text-muted); transition:all 0.15s ease;
+               margin-bottom:-1px; white-space:nowrap;">Advanced</button>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!-- TAB: GENERAL                                                       -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<div id="tab-general" class="tab-panel animate-in delay-2">
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px;">
+
+        <div class="card" style="padding:22px;">
+            <div class="section-title" style="margin-bottom:16px;">System Identity</div>
+            <div style="margin-bottom:14px;">
+                <label>Platform Name</label>
+                <input type="text" value="AI Monitor" placeholder="Platform name">
+            </div>
+            <div style="margin-bottom:14px;">
+                <label>Environment</label>
+                <select>
+                    <option>Production</option>
+                    <option>Staging</option>
+                    <option>Development</option>
+                </select>
+            </div>
+            <div>
+                <label>Version Tag</label>
+                <input type="text" value="v2.1.0" placeholder="e.g. v2.1.0">
+            </div>
+        </div>
+
+        <div class="card" style="padding:22px;">
+            <div class="section-title" style="margin-bottom:16px;">Display Preferences</div>
+            <div style="margin-bottom:14px;">
+                <label>Timezone</label>
+                <select>
+                    <option>UTC</option>
+                    <option>US/Eastern</option>
+                    <option>US/Pacific</option>
+                    <option>Europe/London</option>
+                    <option>Asia/Kolkata</option>
+                </select>
+            </div>
+            <div style="margin-bottom:14px;">
+                <label>Date Format</label>
+                <select>
+                    <option>MMM DD, YYYY</option>
+                    <option>DD/MM/YYYY</option>
+                    <option>YYYY-MM-DD</option>
+                </select>
+            </div>
+            <div>
+                <label>Rows per page</label>
+                <select>
+                    <option>25</option>
+                    <option>50</option>
+                    <option>100</option>
+                </select>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="card" style="padding:18px 22px;">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div style="width:36px;height:36px;border-radius:8px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);display:flex;align-items:center;justify-content:center;font-size:16px;">⚡</div>
+                <div>
+                    <div style="font-size:13.5px;font-weight:500;color:var(--text-primary);">System is running normally</div>
+                    <div style="font-size:11.5px;color:var(--text-muted);margin-top:2px;">All services operational · Uptime 99.98%</div>
+                </div>
+            </div>
+            <span class="badge badge-success">Healthy</span>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!-- TAB: MONITORING                                                    -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<div id="tab-monitoring" class="tab-panel" style="display:none;">
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px;">
+
+        <div class="card" style="padding:22px;">
+            <div class="section-title" style="margin-bottom:16px;">Detection Thresholds</div>
+            <div style="margin-bottom:14px;">
+                <label>Anomaly Sensitivity</label>
+                <select><option>Low</option><option selected>Medium</option><option>High</option><option>Critical Only</option></select>
+            </div>
+            <div style="margin-bottom:14px;">
+                <label>Min. Severity to Flag</label>
+                <select><option>1 — All</option><option>2 — Low+</option><option selected>3 — Medium+</option><option>4 — High+</option><option>5 — Critical Only</option></select>
+            </div>
+            <div>
+                <label>Scan Interval (seconds)</label>
+                <input type="number" value="30" min="5" max="300">
+            </div>
+        </div>
+
+        <div class="card" style="padding:22px;">
+            <div class="section-title" style="margin-bottom:16px;">Trust Score Rules</div>
+            <div style="margin-bottom:14px;">
+                <label>Suspicious Threshold ( ≤ )</label>
+                <input type="number" value="40" min="0" max="100">
+            </div>
+            <div style="margin-bottom:14px;">
+                <label>Auto-flag Below Score</label>
+                <input type="number" value="25" min="0" max="100">
+            </div>
+            <div>
+                <label>Score Decay Rate</label>
+                <select><option>None</option><option selected>Slow (7 days)</option><option>Fast (24 hours)</option></select>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="card" style="padding:0; overflow:hidden;">
+        <div style="padding:14px 20px; border-bottom:1px solid var(--border); background:rgba(255,255,255,0.01);">
+            <span class="section-title">Active Monitors</span>
+        </div>
+
+        <div class="flex items-center justify-between" style="padding:13px 20px; border-bottom:1px solid var(--border-subtle); transition:background 0.12s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
+            <span style="font-size:13.5px;color:var(--text-primary);font-weight:450;">Real-time anomaly scanning</span>
+            <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-track"><span class="toggle-thumb"></span></span></label>
+        </div>
+        <div class="flex items-center justify-between" style="padding:13px 20px; border-bottom:1px solid var(--border-subtle); transition:background 0.12s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
+            <span style="font-size:13.5px;color:var(--text-primary);font-weight:450;">Automatic user flagging</span>
+            <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-track"><span class="toggle-thumb"></span></span></label>
+        </div>
+        <div class="flex items-center justify-between" style="padding:13px 20px; border-bottom:1px solid var(--border-subtle); transition:background 0.12s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
+            <span style="font-size:13.5px;color:var(--text-primary);font-weight:450;">Risk trend computation</span>
+            <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-track"><span class="toggle-thumb"></span></span></label>
+        </div>
+        <div class="flex items-center justify-between" style="padding:13px 20px; border-bottom:1px solid var(--border-subtle); transition:background 0.12s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
+            <span style="font-size:13.5px;color:var(--text-primary);font-weight:450;">Low-severity logging</span>
+            <label class="toggle-switch"><input type="checkbox"><span class="toggle-track"><span class="toggle-thumb"></span></span></label>
+        </div>
+        <div class="flex items-center justify-between" style="padding:13px 20px; transition:background 0.12s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
+            <span style="font-size:13.5px;color:var(--text-primary);font-weight:450;">Nightly report generation</span>
+            <label class="toggle-switch"><input type="checkbox"><span class="toggle-track"><span class="toggle-thumb"></span></span></label>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!-- TAB: NOTIFICATIONS                                                 -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<div id="tab-notifications" class="tab-panel" style="display:none;">
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px;">
+
+        <div class="card" style="padding:22px;">
+            <div class="section-title" style="margin-bottom:16px;">Alert Channels</div>
+            <div style="margin-bottom:14px;">
+                <label>Email Alerts</label>
+                <input type="email" placeholder="admin@yourcompany.com">
+            </div>
+            <div style="margin-bottom:14px;">
+                <label>Slack Webhook URL</label>
+                <input type="url" placeholder="https://hooks.slack.com/...">
+            </div>
+            <div>
+                <label>PagerDuty Integration Key</label>
+                <input type="text" placeholder="pdkey_...">
+            </div>
+        </div>
+
+        <div class="card" style="padding:22px;">
+            <div class="section-title" style="margin-bottom:16px;">Alert Rules</div>
+            <div style="margin-bottom:14px;">
+                <label>Alert on Severity ≥</label>
+                <select><option>3 — Medium</option><option selected>4 — High</option><option>5 — Critical</option></select>
+            </div>
+            <div style="margin-bottom:14px;">
+                <label>Cooldown Between Alerts</label>
+                <select><option>None</option><option selected>5 minutes</option><option>15 minutes</option><option>1 hour</option></select>
+            </div>
+            <div>
+                <label>Digest Frequency</label>
+                <select><option>Real-time</option><option selected>Hourly</option><option>Daily</option></select>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="card" style="padding:0; overflow:hidden;">
+        <div style="padding:14px 20px; border-bottom:1px solid var(--border); background:rgba(255,255,255,0.01);">
+            <span class="section-title">Notify On</span>
+        </div>
+        <div class="flex items-center justify-between" style="padding:13px 20px; border-bottom:1px solid var(--border-subtle); transition:background 0.12s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
+            <span style="font-size:13.5px;color:var(--text-primary);font-weight:450;">New anomaly detected</span>
+            <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-track"><span class="toggle-thumb"></span></span></label>
+        </div>
+        <div class="flex items-center justify-between" style="padding:13px 20px; border-bottom:1px solid var(--border-subtle); transition:background 0.12s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
+            <span style="font-size:13.5px;color:var(--text-primary);font-weight:450;">User trust score drops below threshold</span>
+            <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-track"><span class="toggle-thumb"></span></span></label>
+        </div>
+        <div class="flex items-center justify-between" style="padding:13px 20px; border-bottom:1px solid var(--border-subtle); transition:background 0.12s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
+            <span style="font-size:13.5px;color:var(--text-primary);font-weight:450;">Investigation marked complete</span>
+            <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-track"><span class="toggle-thumb"></span></span></label>
+        </div>
+        <div class="flex items-center justify-between" style="padding:13px 20px; border-bottom:1px solid var(--border-subtle); transition:background 0.12s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
+            <span style="font-size:13.5px;color:var(--text-primary);font-weight:450;">Daily summary report</span>
+            <label class="toggle-switch"><input type="checkbox"><span class="toggle-track"><span class="toggle-thumb"></span></span></label>
+        </div>
+        <div class="flex items-center justify-between" style="padding:13px 20px; transition:background 0.12s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
+            <span style="font-size:13.5px;color:var(--text-primary);font-weight:450;">System health degradation</span>
+            <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-track"><span class="toggle-thumb"></span></span></label>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!-- TAB: SECURITY                                                      -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<div id="tab-security" class="tab-panel" style="display:none;">
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px;">
+
+        <div class="card" style="padding:22px;">
+            <div class="section-title" style="margin-bottom:16px;">Access Control</div>
+            <div style="margin-bottom:14px;">
+                <label>Session Timeout (minutes)</label>
+                <input type="number" value="60" min="5">
+            </div>
+            <div style="margin-bottom:14px;">
+                <label>Max Login Attempts</label>
+                <input type="number" value="5" min="1">
+            </div>
+            <div>
+                <label>IP Allowlist</label>
+                <input type="text" placeholder="0.0.0.0/0  (all IPs)">
+            </div>
+        </div>
+
+        <div class="card" style="padding:22px;">
+            <div class="section-title" style="margin-bottom:16px;">API Keys</div>
+            <div style="margin-bottom:14px;">
+                <label>Active API Key</label>
+                <div style="position:relative;">
+                    <input type="password" value="sk-live-xxxxxxxxxxxxxxxxxxxx"
+                           id="api-key-input" readonly style="padding-right:80px;">
+                    <button onclick="toggleKey()" id="toggle-key-btn" style="
+                        position:absolute; right:8px; top:50%;
+                        transform:translateY(-50%);
+                        background:var(--bg-elevated); border:1px solid var(--border);
+                        border-radius:4px; color:var(--text-secondary);
+                        font-size:11px; font-weight:500; padding:3px 8px;
+                        cursor:pointer; font-family:'DM Sans',sans-serif;
+                        transition:all 0.15s ease;">Reveal</button>
+                </div>
+            </div>
+            <button class="btn btn-danger" style="font-size:12px;padding:6px 14px;width:100%;">
+                ↻ &nbsp;Rotate API Key
+            </button>
+        </div>
+
+    </div>
+
+    <div class="card" style="padding:0; overflow:hidden;">
+        <div style="padding:14px 20px; border-bottom:1px solid var(--border); background:rgba(255,255,255,0.01);">
+            <span class="section-title">Security Checklist</span>
+        </div>
+        <div class="flex items-center gap-3" style="padding:12px 20px; border-bottom:1px solid var(--border-subtle); transition:background 0.12s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
+            <div style="width:18px;height:18px;border-radius:50%;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.25);display:flex;align-items:center;justify-content:center;font-size:9px;color:#34d399;flex-shrink:0;">✓</div>
+            <span style="font-size:13.5px;color:var(--text-primary);font-weight:450;">HTTPS enforced</span>
+            <span class="badge badge-success" style="margin-left:auto;">Enabled</span>
+        </div>
+        <div class="flex items-center gap-3" style="padding:12px 20px; border-bottom:1px solid var(--border-subtle); transition:background 0.12s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
+            <div style="width:18px;height:18px;border-radius:50%;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.25);display:flex;align-items:center;justify-content:center;font-size:9px;color:#34d399;flex-shrink:0;">✓</div>
+            <span style="font-size:13.5px;color:var(--text-primary);font-weight:450;">API key rotation enabled</span>
+            <span class="badge badge-success" style="margin-left:auto;">Enabled</span>
+        </div>
+        <div class="flex items-center gap-3" style="padding:12px 20px; border-bottom:1px solid var(--border-subtle); transition:background 0.12s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
+            <div style="width:18px;height:18px;border-radius:50%;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.25);display:flex;align-items:center;justify-content:center;font-size:9px;color:#34d399;flex-shrink:0;">✓</div>
+            <span style="font-size:13.5px;color:var(--text-primary);font-weight:450;">Session expiry active</span>
+            <span class="badge badge-success" style="margin-left:auto;">Enabled</span>
+        </div>
+        <div class="flex items-center gap-3" style="padding:12px 20px; border-bottom:1px solid var(--border-subtle); transition:background 0.12s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
+            <div style="width:18px;height:18px;border-radius:50%;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.25);display:flex;align-items:center;justify-content:center;font-size:9px;color:#34d399;flex-shrink:0;">✓</div>
+            <span style="font-size:13.5px;color:var(--text-primary);font-weight:450;">Audit logging enabled</span>
+            <span class="badge badge-success" style="margin-left:auto;">Enabled</span>
+        </div>
+        <div class="flex items-center gap-3" style="padding:12px 20px; transition:background 0.12s;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
+            <div style="width:18px;height:18px;border-radius:50%;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.25);display:flex;align-items:center;justify-content:center;font-size:9px;color:#34d399;flex-shrink:0;">✓</div>
+            <span style="font-size:13.5px;color:var(--text-primary);font-weight:450;">IP restriction configured</span>
+            <span class="badge badge-success" style="margin-left:auto;">Enabled</span>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!-- TAB: ADVANCED                                                      -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<div id="tab-advanced" class="tab-panel" style="display:none;">
+
+    <div style="margin-bottom:20px;">
+        <div class="card" style="padding:22px; margin-bottom:16px;">
+            <div class="section-title" style="margin-bottom:16px;">Data Retention</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px;">
+                <div><label>Log Retention (days)</label><input type="number" value="90" min="7"></div>
+                <div><label>Risk History Depth</label><input type="number" value="50" min="10"></div>
+                <div><label>Archive After (days)</label><input type="number" value="180" min="30"></div>
+            </div>
+        </div>
+
+        <div class="card" style="padding:22px;">
+            <div class="section-title" style="margin-bottom:16px;">Developer Options</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+                <div>
+                    <label>Debug Mode</label>
+                    <select><option selected>Off</option><option>On</option><option>Verbose</option></select>
+                </div>
+                <div>
+                    <label>Log Level</label>
+                    <select><option>DEBUG</option><option selected>INFO</option><option>WARNING</option><option>ERROR</option></select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Danger zone -->
+    <div style="border-radius:var(--radius-lg); border:1px solid rgba(239,68,68,0.2); background:rgba(239,68,68,0.04); overflow:hidden;">
+        <div style="padding:14px 20px; border-bottom:1px solid rgba(239,68,68,0.15); background:rgba(239,68,68,0.05); display:flex; align-items:center; gap:8px;">
+            <span style="font-size:13px;font-weight:600;color:#f87171;font-family:'Syne',sans-serif;letter-spacing:-0.01em;">⚠ Danger Zone</span>
+        </div>
+
+        <div class="flex items-center justify-between" style="padding:13px 20px; border-bottom:1px solid rgba(239,68,68,0.08); transition:background 0.12s;" onmouseover="this.style.background='rgba(239,68,68,0.04)'" onmouseout="this.style.background='transparent'">
+            <div>
+                <div style="font-size:13.5px;color:var(--text-primary);font-weight:450;">Flush all anomaly logs</div>
+                <div style="font-size:11.5px;color:var(--text-muted);margin-top:2px;">This action is irreversible and cannot be undone</div>
+            </div>
+            <button class="btn btn-danger" style="font-size:11.5px;padding:5px 12px;flex-shrink:0;">Execute</button>
+        </div>
+        <div class="flex items-center justify-between" style="padding:13px 20px; border-bottom:1px solid rgba(239,68,68,0.08); transition:background 0.12s;" onmouseover="this.style.background='rgba(239,68,68,0.04)'" onmouseout="this.style.background='transparent'">
+            <div>
+                <div style="font-size:13.5px;color:var(--text-primary);font-weight:450;">Reset all trust scores to 100</div>
+                <div style="font-size:11.5px;color:var(--text-muted);margin-top:2px;">This action is irreversible and cannot be undone</div>
+            </div>
+            <button class="btn btn-danger" style="font-size:11.5px;padding:5px 12px;flex-shrink:0;">Execute</button>
+        </div>
+        <div class="flex items-center justify-between" style="padding:13px 20px; border-bottom:1px solid rgba(239,68,68,0.08); transition:background 0.12s;" onmouseover="this.style.background='rgba(239,68,68,0.04)'" onmouseout="this.style.background='transparent'">
+            <div>
+                <div style="font-size:13.5px;color:var(--text-primary);font-weight:450;">Clear investigation history</div>
+                <div style="font-size:11.5px;color:var(--text-muted);margin-top:2px;">This action is irreversible and cannot be undone</div>
+            </div>
+            <button class="btn btn-danger" style="font-size:11.5px;padding:5px 12px;flex-shrink:0;">Execute</button>
+        </div>
+        <div class="flex items-center justify-between" style="padding:13px 20px; border-bottom:1px solid rgba(239,68,68,0.08); transition:background 0.12s;" onmouseover="this.style.background='rgba(239,68,68,0.04)'" onmouseout="this.style.background='transparent'">
+            <div>
+                <div style="font-size:13.5px;color:var(--text-primary);font-weight:450;">Purge archived data</div>
+                <div style="font-size:11.5px;color:var(--text-muted);margin-top:2px;">This action is irreversible and cannot be undone</div>
+            </div>
+            <button class="btn btn-danger" style="font-size:11.5px;padding:5px 12px;flex-shrink:0;">Execute</button>
+        </div>
+        <div class="flex items-center justify-between" style="padding:13px 20px; transition:background 0.12s;" onmouseover="this.style.background='rgba(239,68,68,0.04)'" onmouseout="this.style.background='transparent'">
+            <div>
+                <div style="font-size:13.5px;color:var(--text-primary);font-weight:450;">Factory reset all settings</div>
+                <div style="font-size:11.5px;color:var(--text-muted);margin-top:2px;">This action is irreversible and cannot be undone</div>
+            </div>
+            <button class="btn btn-danger" style="font-size:11.5px;padding:5px 12px;flex-shrink:0;">Execute</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── TOGGLE SWITCH STYLES ──────────────────────────────────────────── -->
+<style>
+    .toggle-switch {
+        position:relative; display:inline-flex;
+        align-items:center; cursor:pointer; flex-shrink:0;
+    }
+    .toggle-switch input { position:absolute; opacity:0; width:0; height:0; }
+    .toggle-track {
+        width:36px; height:20px;
+        background:var(--bg-elevated); border:1px solid var(--border);
+        border-radius:20px; position:relative;
+        transition:all 0.2s ease; display:block;
+    }
+    .toggle-thumb {
+        position:absolute; top:2px; left:2px;
+        width:14px; height:14px; border-radius:50%;
+        background:var(--text-muted);
+        transition:all 0.2s ease; display:block;
+    }
+    .toggle-switch input:checked + .toggle-track {
+        background:rgba(59,130,246,0.25);
+        border-color:rgba(59,130,246,0.4);
+    }
+    .toggle-switch input:checked + .toggle-track .toggle-thumb {
+        transform:translateX(16px);
+        background:var(--accent);
+        box-shadow:0 0 6px var(--accent-glow);
+    }
+    .settings-tab:hover { color:var(--text-primary) !important; }
+</style>
+
+<script>
+    function switchTab(btn, tabId) {
+        document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
+        document.querySelectorAll('.settings-tab').forEach(t => {
+            t.style.borderBottomColor = 'transparent';
+            t.style.color = 'var(--text-muted)';
+        });
+        document.getElementById('tab-' + tabId).style.display = 'block';
+        btn.style.borderBottomColor = 'var(--accent)';
+        btn.style.color = 'var(--text-primary)';
+    }
+
+    function toggleKey() {
+        const input = document.getElementById('api-key-input');
+        const btn   = document.getElementById('toggle-key-btn');
+        if (input.type === 'password') {
+            input.type = 'text';
+            btn.textContent = 'Hide';
+        } else {
+            input.type = 'password';
+            btn.textContent = 'Reveal';
+        }
+    }
+</script>
+
+{% endblock %}

@@ -1,0 +1,588 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- ── PAGE HEADER ──────────────────────────────────────────────────── -->
+<div class="flex items-center justify-between mb-6 animate-in">
+    <div>
+        <h1 class="page-title">Anomaly Logs</h1>
+        <p class="page-subtitle">Full audit trail of detected anomalies across all users</p>
+    </div>
+    <div class="flex items-center gap-2">
+        <div class="topbar-chip">
+            <span class="dot"></span>
+            Live ingestion
+        </div>
+        <button class="btn btn-secondary btn-sm"
+                id="filter-btn"
+                onclick="toggleFilter(this)">
+            ⊞ Filter
+        </button>
+        <button class="btn btn-primary btn-sm" data-loading="1400">
+            ⤓ Export CSV
+        </button>
+    </div>
+</div>
+
+<!-- ── SEVERITY LEGEND CHIPS ─────────────────────────────────────────── -->
+<div class="flex items-center gap-2 mb-5 animate-in delay-1" id="severity-chips">
+
+    <button class="sev-chip sev-chip-all active" onclick="filterSeverity('all', this)">
+        <span class="chip-dot" style="background:var(--text-muted);"></span>
+        All
+    </button>
+    <button class="sev-chip sev-chip-red" onclick="filterSeverity('critical', this)">
+        <span class="chip-dot" style="background:#f87171;"></span>
+        Critical
+    </button>
+    <button class="sev-chip sev-chip-amber" onclick="filterSeverity('high', this)">
+        <span class="chip-dot" style="background:#fbbf24;"></span>
+        High
+    </button>
+    <button class="sev-chip sev-chip-blue" onclick="filterSeverity('medium', this)">
+        <span class="chip-dot" style="background:#93c5fd;"></span>
+        Medium
+    </button>
+    <button class="sev-chip sev-chip-neutral" onclick="filterSeverity('low', this)">
+        <span class="chip-dot" style="background:#94a3b8;"></span>
+        Low
+    </button>
+
+    <!-- Live log counter badge -->
+    <div style="margin-left:auto;">
+        <span class="badge badge-neutral" id="log-count-badge">
+            {% if logs %}{{ logs|length }} entries{% else %}0 entries{% endif %}
+        </span>
+    </div>
+
+</div>
+
+<!-- ── FILTER BAR (collapsible) ──────────────────────────────────────── -->
+<div class="filter-bar animate-in delay-1" id="filter-bar" style="display:none;">
+    <div class="filter-bar-inner">
+        <div style="flex:1; min-width:160px;">
+            <label>Search user</label>
+            <input type="text" id="search-user"
+                   placeholder="Type a username…"
+                   oninput="applyFilters()">
+        </div>
+        <div style="flex:1; min-width:160px;">
+            <label>Anomaly type</label>
+            <input type="text" id="search-type"
+                   placeholder="e.g. Spam, Flood…"
+                   oninput="applyFilters()">
+        </div>
+        <div style="flex:0 0 auto; align-self:flex-end;">
+            <button class="btn btn-ghost btn-sm"
+                    style="border:1px solid var(--border);"
+                    onclick="clearFilters()">
+                ✕ Clear
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ── LOGS TABLE ────────────────────────────────────────────────────── -->
+<div class="animate-in delay-2" id="logs-section">
+
+    {% if logs %}
+
+    <div class="table-wrapper" id="logs-table-wrapper">
+        <table id="logs-table">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Post</th>
+                    <th>Anomaly Type</th>
+                    <th>Severity</th>
+                    <th>Timestamp</th>
+                </tr>
+            </thead>
+            <tbody id="logs-tbody">
+                {% for log in logs %}
+                <tr class="log-row"
+                    data-severity="{% if log.severity >= 4 %}critical{% elif log.severity == 3 %}high{% elif log.severity == 2 %}medium{% else %}low{% endif %}"
+                    data-user="{{ log.user.username|lower }}"
+                    data-type="{{ log.anomaly_type|lower }}"
+                    style="animation: row-enter 0.28s var(--ease-out) {{ forloop.counter0|add:'0' }}00ms both;">
+
+                    <!-- User -->
+                    <td>
+                        <div class="flex items-center gap-2">
+                            <div class="log-avatar">
+                                {{ log.user.username|first|upper }}
+                            </div>
+                            <span class="log-username">{{ log.user.username }}</span>
+                        </div>
+                    </td>
+
+                    <!-- Post title -->
+                    <td>
+                        <span class="log-post-title truncate"
+                              title="{{ log.post.title }}"
+                              style="max-width:180px; display:inline-block;">
+                            {{ log.post.title }}
+                        </span>
+                    </td>
+
+                    <!-- Anomaly type -->
+                    <td>
+                        <span class="anomaly-type-badge">
+                            ◈ {{ log.anomaly_type }}
+                        </span>
+                    </td>
+
+                    <!-- Severity -->
+                    <td>
+                        {% if log.severity >= 4 %}
+                            <span class="badge badge-danger sev-badge">
+                                ▲ {{ log.severity }} — Critical
+                            </span>
+                        {% elif log.severity == 3 %}
+                            <span class="badge badge-warning sev-badge">
+                                ▲ {{ log.severity }} — High
+                            </span>
+                        {% elif log.severity == 2 %}
+                            <span class="badge badge-info sev-badge">
+                                ● {{ log.severity }} — Medium
+                            </span>
+                        {% else %}
+                            <span class="badge badge-neutral sev-badge">
+                                ▼ {{ log.severity }} — Low
+                            </span>
+                        {% endif %}
+                    </td>
+
+                    <!-- Timestamp -->
+                    <td>
+                        <div class="log-timestamp">
+                            <span class="log-date">{{ log.created_at|date:"M d, Y" }}</span>
+                            <span class="log-time">{{ log.created_at|time:"H:i:s" }}</span>
+                        </div>
+                    </td>
+
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Table footer -->
+    <div class="table-footer animate-in delay-3">
+        <div class="flex items-center gap-2">
+            <span class="table-footer-text" id="footer-count">
+                Showing {{ logs|length }} log entr{{ logs|length|pluralize:"y,ies" }}
+            </span>
+            <span class="table-footer-dot">·</span>
+            <span class="table-footer-text" id="filter-status">No filters applied</span>
+        </div>
+        <span class="table-footer-text">Sorted by most recent</span>
+    </div>
+
+    {% else %}
+
+    <!-- ── EMPTY STATE ─────────────────────────────────────────────── -->
+    <div class="card logs-empty-state">
+        <div class="empty-icon-wrap">🪵</div>
+        <p class="empty-title">No anomaly logs found</p>
+        <p class="empty-sub">
+            The system hasn't detected any anomalies yet.
+            Logs will appear here automatically.
+        </p>
+    </div>
+
+    {% endif %}
+
+</div>
+
+<!-- ── PAGE STYLES ───────────────────────────────────────────────────── -->
+<style>
+
+    /* ── Severity filter chips ────────────────── */
+    .sev-chip {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 13px;
+        border-radius: var(--radius-full);
+        font-size: 11.5px;
+        font-weight: 500;
+        cursor: pointer;
+        border: 1px solid var(--border);
+        background: transparent;
+        color: var(--text-muted);
+        font-family: 'DM Sans', sans-serif;
+        transition: var(--transition);
+        outline: none;
+        user-select: none;
+    }
+
+    .sev-chip:hover { color: var(--text-primary); background: rgba(255,255,255,0.04); }
+
+    .sev-chip.active { color: var(--text-primary); background: var(--bg-elevated); border-color: var(--border-medium); }
+
+    .chip-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+
+    .sev-chip-red.active    { background: rgba(239,68,68,0.10);  border-color: rgba(239,68,68,0.22);  color: #f87171; }
+    .sev-chip-amber.active  { background: rgba(245,158,11,0.10); border-color: rgba(245,158,11,0.22); color: #fbbf24; }
+    .sev-chip-blue.active   { background: rgba(59,130,246,0.10); border-color: rgba(59,130,246,0.22); color: #93c5fd; }
+    .sev-chip-neutral.active{ background: rgba(148,163,184,0.08);border-color: rgba(148,163,184,0.18);color: #94a3b8; }
+
+    /* ── Filter bar ─────────────────────────────── */
+    .filter-bar {
+        margin-bottom: 16px;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border);
+        background: var(--bg-card);
+        overflow: hidden;
+        animation: fade-up 0.22s var(--ease-out) both;
+    }
+
+    .filter-bar-inner {
+        display: flex;
+        align-items: flex-end;
+        gap: 12px;
+        padding: 14px 16px;
+        flex-wrap: wrap;
+    }
+
+    /* ── Table row entrance ──────────────────────── */
+    @keyframes row-enter {
+        from { opacity: 0; transform: translateX(-6px); }
+        to   { opacity: 1; transform: translateX(0); }
+    }
+
+    /* ── Log row hover ───────────────────────────── */
+    .log-row {
+        transition:
+            background  var(--t-fast) var(--ease-out),
+            box-shadow  var(--t-fast) var(--ease-out);
+    }
+
+    .log-row:hover .log-avatar {
+        transform: scale(1.1);
+        box-shadow: 0 0 10px rgba(59,130,246,0.22);
+    }
+
+    /* Severity-coloured left border on hover */
+    .log-row[data-severity="critical"]:hover {
+        background: rgba(239,68,68,0.04) !important;
+        box-shadow: inset 3px 0 0 rgba(239,68,68,0.55) !important;
+    }
+
+    .log-row[data-severity="high"]:hover {
+        background: rgba(245,158,11,0.04) !important;
+        box-shadow: inset 3px 0 0 rgba(245,158,11,0.55) !important;
+    }
+
+    .log-row[data-severity="medium"]:hover {
+        background: rgba(59,130,246,0.04) !important;
+        box-shadow: inset 3px 0 0 rgba(59,130,246,0.55) !important;
+    }
+
+    .log-row[data-severity="low"]:hover {
+        background: rgba(148,163,184,0.03) !important;
+        box-shadow: inset 3px 0 0 rgba(148,163,184,0.35) !important;
+    }
+
+    /* ── Log avatar ──────────────────────────────── */
+    .log-avatar {
+        width: 26px; height: 26px;
+        border-radius: 50%;
+        background: linear-gradient(135deg,
+            rgba(59,130,246,0.22),
+            rgba(139,92,246,0.22));
+        border: 1px solid rgba(255,255,255,0.07);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: 700;
+        color: var(--text-primary);
+        flex-shrink: 0;
+        transition:
+            transform  var(--t-base) var(--ease-spring),
+            box-shadow var(--t-base) var(--ease-out);
+    }
+
+    /* ── Log typography ──────────────────────────── */
+    .log-username {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text-primary);
+    }
+
+    .log-post-title {
+        font-size: 13px;
+        color: var(--text-secondary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* ── Anomaly type tag ────────────────────────── */
+    .anomaly-type-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 3px 9px;
+        border-radius: var(--radius-sm);
+        background: rgba(139,92,246,0.09);
+        border: 1px solid rgba(139,92,246,0.16);
+        font-size: 11.5px;
+        font-weight: 500;
+        color: #c4b5fd;
+        white-space: nowrap;
+        transition: var(--transition);
+    }
+
+    .log-row:hover .anomaly-type-badge {
+        background: rgba(139,92,246,0.15);
+        border-color: rgba(139,92,246,0.28);
+    }
+
+    /* ── Timestamp ───────────────────────────────── */
+    .log-timestamp {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .log-date {
+        font-size: 12.5px;
+        color: var(--text-secondary);
+        font-family: 'DM Sans', sans-serif;
+    }
+
+    .log-time {
+        font-size: 10.5px;
+        color: var(--text-muted);
+        font-family: 'JetBrains Mono', 'Fira Code', monospace;
+        letter-spacing: 0.03em;
+    }
+
+    /* ── Severity badge hover ────────────────────── */
+    .sev-badge {
+        transition: transform var(--t-base) var(--ease-spring),
+                    filter    var(--t-base) var(--ease-out);
+    }
+
+    .log-row:hover .sev-badge {
+        transform: scale(1.05);
+        filter: brightness(1.15);
+    }
+
+    /* ── Table footer ────────────────────────────── */
+    .table-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 12px;
+        padding: 0 4px;
+    }
+
+    .table-footer-text  { font-size: 12px; color: var(--text-muted); }
+    .table-footer-dot   { font-size: 12px; color: var(--text-muted); opacity: 0.4; }
+
+    /* ── Hidden rows (filtered) ──────────────────── */
+    .log-row.filtered-out {
+        display: none;
+    }
+
+    /* ── No results row ──────────────────────────── */
+    .no-results-row td {
+        text-align: center;
+        padding: 40px 16px;
+        color: var(--text-muted);
+        font-size: 13px;
+    }
+
+    /* ── Empty state ─────────────────────────────── */
+    .logs-empty-state {
+        padding: 64px 24px;
+        text-align: center;
+    }
+
+    .empty-icon-wrap {
+        font-size: 40px;
+        margin-bottom: 16px;
+        opacity: 0.32;
+        display: block;
+        animation: float 3.5s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50%       { transform: translateY(-5px); }
+    }
+
+    .empty-title {
+        font-family: 'Syne', sans-serif;
+        font-size: 16px;
+        font-weight: 650;
+        color: var(--text-primary);
+        margin-bottom: 6px;
+        letter-spacing: -0.02em;
+    }
+
+    .empty-sub {
+        font-size: 13px;
+        color: var(--text-muted);
+        line-height: 1.65;
+        max-width: 360px;
+        margin: 0 auto;
+    }
+
+    /* ── Live ingestion pulse ────────────────────── */
+    @keyframes new-row-flash {
+        0%   { background: rgba(59,130,246,0.12); }
+        100% { background: transparent; }
+    }
+
+    .log-row.new-entry {
+        animation: new-row-flash 1.2s var(--ease-out) both;
+    }
+
+</style>
+
+<!-- ── FILTER + INTERACTION SCRIPTS ─────────────────────────────────── -->
+<script>
+(function () {
+    'use strict';
+
+    let activeSeverity = 'all';
+    let searchUser = '';
+    let searchType = '';
+
+    /* ── Filter bar toggle ──────────────────────────────────────── */
+    window.toggleFilter = function (btn) {
+        const bar = document.getElementById('filter-bar');
+        const isOpen = bar.style.display !== 'none';
+
+        if (isOpen) {
+            bar.style.transition = 'opacity 0.15s ease, transform 0.15s ease';
+            bar.style.opacity = '0';
+            bar.style.transform = 'translateY(-4px)';
+            setTimeout(() => {
+                bar.style.display = 'none';
+                bar.style.opacity = '';
+                bar.style.transform = '';
+            }, 150);
+            btn.classList.remove('active-filter');
+        } else {
+            bar.style.display = 'block';
+            bar.style.opacity = '0';
+            bar.style.transform = 'translateY(-4px)';
+            requestAnimationFrame(() => {
+                bar.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+                bar.style.opacity = '1';
+                bar.style.transform = 'translateY(0)';
+            });
+            btn.classList.add('active-filter');
+            document.getElementById('search-user').focus();
+        }
+    };
+
+    /* ── Severity chip filter ───────────────────────────────────── */
+    window.filterSeverity = function (level, btn) {
+        activeSeverity = level;
+
+        // Update chip active state
+        document.querySelectorAll('.sev-chip').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+
+        applyFilters();
+    };
+
+    /* ── Combined filter apply ──────────────────────────────────── */
+    window.applyFilters = function () {
+        searchUser = (document.getElementById('search-user')?.value || '').toLowerCase();
+        searchType = (document.getElementById('search-type')?.value || '').toLowerCase();
+
+        const rows   = document.querySelectorAll('.log-row');
+        let visible  = 0;
+
+        rows.forEach(row => {
+            const sev  = row.dataset.severity;
+            const user = row.dataset.user  || '';
+            const type = row.dataset.type  || '';
+
+            const sevMatch  = activeSeverity === 'all' || sev === activeSeverity;
+            const userMatch = !searchUser || user.includes(searchUser);
+            const typeMatch = !searchType || type.includes(searchType);
+
+            const show = sevMatch && userMatch && typeMatch;
+            row.classList.toggle('filtered-out', !show);
+            if (show) visible++;
+        });
+
+        // Update footer
+        updateFooter(visible, rows.length);
+
+        // Show / hide no-results message
+        let noRes = document.getElementById('no-results-row');
+        if (visible === 0) {
+            if (!noRes) {
+                noRes = document.createElement('tr');
+                noRes.id = 'no-results-row';
+                noRes.className = 'no-results-row';
+                noRes.innerHTML = '<td colspan="5">No logs match the current filters</td>';
+                document.getElementById('logs-tbody').appendChild(noRes);
+            }
+        } else if (noRes) {
+            noRes.remove();
+        }
+    };
+
+    /* ── Clear filters ──────────────────────────────────────────── */
+    window.clearFilters = function () {
+        const su = document.getElementById('search-user');
+        const st = document.getElementById('search-type');
+        if (su) su.value = '';
+        if (st) st.value = '';
+
+        activeSeverity = 'all';
+        document.querySelectorAll('.sev-chip').forEach(c => c.classList.remove('active'));
+        document.querySelector('.sev-chip-all')?.classList.add('active');
+
+        applyFilters();
+    };
+
+    /* ── Footer counter update ──────────────────────────────────── */
+    function updateFooter(visible, total) {
+        const countEl  = document.getElementById('footer-count');
+        const statusEl = document.getElementById('filter-status');
+
+        if (countEl) {
+            countEl.textContent =
+                `Showing ${visible} of ${total} entr${total === 1 ? 'y' : 'ies'}`;
+        }
+
+        if (statusEl) {
+            const filters = [];
+            if (activeSeverity !== 'all') filters.push(activeSeverity + ' severity');
+            if (searchUser) filters.push(`user: "${searchUser}"`);
+            if (searchType) filters.push(`type: "${searchType}"`);
+            statusEl.textContent = filters.length
+                ? 'Filtered by: ' + filters.join(', ')
+                : 'No filters applied';
+        }
+
+        // Update the badge in the chips bar
+        const badge = document.getElementById('log-count-badge');
+        if (badge) badge.textContent = visible + ' entr' + (visible === 1 ? 'y' : 'ies');
+    }
+
+    /* ── Staggered row entrance ─────────────────────────────────── */
+    function staggerRows() {
+        document.querySelectorAll('.log-row').forEach((row, i) => {
+            row.style.animationDelay = `${i * 30}ms`;
+        });
+    }
+
+    /* ── Init ───────────────────────────────────────────────────── */
+    staggerRows();
+
+})();
+</script>
+
+{% endblock %}

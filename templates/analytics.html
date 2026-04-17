@@ -1,0 +1,254 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- ── PAGE HEADER ──────────────────────────────────────────────────── -->
+<div class="flex items-center justify-between mb-6 animate-in">
+    <div>
+        <h1 class="page-title">Analytics</h1>
+        <p style="font-size:13px; color:var(--text-muted); margin-top:4px; font-weight:400;">
+            Deep insights into your AI system performance
+        </p>
+    </div>
+    <div class="flex items-center gap-2">
+        <div class="topbar-chip">
+            <span class="dot"></span>
+            Live data
+        </div>
+        <button class="btn btn-secondary" style="font-size:12px; padding:6px 14px;">
+            ⊞ &nbsp;Filter
+        </button>
+        <button class="btn btn-primary" style="font-size:12px; padding:6px 14px;">
+            ⤓ &nbsp;Export
+        </button>
+    </div>
+</div>
+
+<!-- ── TIME RANGE TABS ───────────────────────────────────────────────── -->
+<div class="flex items-center gap-2 mb-6 animate-in delay-1">
+    <div style="
+        display: flex;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 3px;
+        gap: 2px;
+    ">
+        <button onclick="setRange(this)" class="range-btn range-active"
+            style="padding:5px 14px; border-radius:7px; border:none;
+                   background:var(--bg-elevated); color:var(--text-primary);
+                   font-family:'DM Sans',sans-serif; font-size:12px;
+                   font-weight:500; cursor:pointer; transition:all 0.15s ease;">24h</button>
+
+        <button onclick="setRange(this)" class="range-btn"
+            style="padding:5px 14px; border-radius:7px; border:none;
+                   background:transparent; color:var(--text-muted);
+                   font-family:'DM Sans',sans-serif; font-size:12px;
+                   font-weight:500; cursor:pointer; transition:all 0.15s ease;">7d</button>
+
+        <button onclick="setRange(this)" class="range-btn"
+            style="padding:5px 14px; border-radius:7px; border:none;
+                   background:transparent; color:var(--text-muted);
+                   font-family:'DM Sans',sans-serif; font-size:12px;
+                   font-weight:500; cursor:pointer; transition:all 0.15s ease;">30d</button>
+
+        <button onclick="setRange(this)" class="range-btn"
+            style="padding:5px 14px; border-radius:7px; border:none;
+                   background:transparent; color:var(--text-muted);
+                   font-family:'DM Sans',sans-serif; font-size:12px;
+                   font-weight:500; cursor:pointer; transition:all 0.15s ease;">90d</button>
+    </div>
+    <span style="font-size:12px; color:var(--text-muted); margin-left:4px;">
+        Showing data for selected range
+    </span>
+</div>
+
+<!-- ── COMING SOON HERO ──────────────────────────────────────────────── -->
+<div class="card animate-in delay-2" style="padding:0; overflow:hidden; margin-bottom:24px; position:relative;">
+    <div style="
+        position:absolute; top:-60px; left:50%;
+        transform:translateX(-50%);
+        width:400px; height:200px;
+        background:radial-gradient(ellipse, rgba(59,130,246,0.12) 0%, transparent 70%);
+        pointer-events:none;
+    "></div>
+
+    <div style="padding:64px 24px; text-align:center; position:relative;">
+        <div style="
+            width:56px; height:56px; border-radius:14px;
+            background:linear-gradient(135deg, rgba(59,130,246,0.2), rgba(20,184,166,0.2));
+            border:1px solid rgba(59,130,246,0.2);
+            display:flex; align-items:center; justify-content:center;
+            font-size:24px; margin:0 auto 20px;
+            box-shadow:0 0 24px rgba(59,130,246,0.1);
+        ">◈</div>
+
+        <h2 style="
+            font-family:'Syne',sans-serif; font-size:20px; font-weight:700;
+            color:var(--text-primary); letter-spacing:-0.02em; margin-bottom:10px;
+        ">Analytics Engine Coming Soon</h2>
+
+        <p style="
+            font-size:13.5px; color:var(--text-muted);
+            max-width:420px; margin:0 auto 28px; line-height:1.65;
+        ">
+            Powerful charts, trend analysis, and AI performance breakdowns
+            are being built. Check back shortly.
+        </p>
+
+        <div style="
+            max-width:300px; margin:0 auto 10px;
+            background:var(--bg-elevated); border-radius:4px;
+            height:4px; overflow:hidden; border:1px solid var(--border);
+        ">
+            <div style="
+                height:100%; width:68%;
+                background:linear-gradient(90deg, var(--accent), var(--teal));
+                border-radius:4px;
+                animation:progress-shimmer 2.2s ease infinite;
+            "></div>
+        </div>
+        <span style="font-size:11.5px; color:var(--text-muted);">68% complete</span>
+    </div>
+</div>
+
+<!-- ── PLACEHOLDER CHART CARDS ───────────────────────────────────────── -->
+<div class="grid-2 mb-6">
+
+    <!-- Requests over time -->
+    <div class="card animate-in delay-3" style="padding:0; overflow:hidden;">
+        <div class="flex items-center justify-between" style="
+            padding:14px 18px; border-bottom:1px solid var(--border);
+            background:rgba(255,255,255,0.01);
+        ">
+            <span class="section-title">Requests Over Time</span>
+            <span class="badge badge-neutral">Preview</span>
+        </div>
+        <div style="padding:20px;">
+            <div style="display:flex; align-items:flex-end; gap:4px; height:80px; margin-bottom:12px;">
+                <div style="flex:1;height:35%;background:linear-gradient(180deg,rgba(59,130,246,0.5),rgba(59,130,246,0.1));border-radius:3px 3px 0 0;opacity:0.6;transition:opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'"></div>
+                <div style="flex:1;height:55%;background:linear-gradient(180deg,rgba(59,130,246,0.5),rgba(59,130,246,0.1));border-radius:3px 3px 0 0;opacity:0.6;transition:opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'"></div>
+                <div style="flex:1;height:40%;background:linear-gradient(180deg,rgba(59,130,246,0.5),rgba(59,130,246,0.1));border-radius:3px 3px 0 0;opacity:0.6;transition:opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'"></div>
+                <div style="flex:1;height:70%;background:linear-gradient(180deg,rgba(59,130,246,0.5),rgba(59,130,246,0.1));border-radius:3px 3px 0 0;opacity:0.6;transition:opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'"></div>
+                <div style="flex:1;height:60%;background:linear-gradient(180deg,rgba(59,130,246,0.5),rgba(59,130,246,0.1));border-radius:3px 3px 0 0;opacity:0.6;transition:opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'"></div>
+                <div style="flex:1;height:85%;background:linear-gradient(180deg,rgba(59,130,246,0.5),rgba(59,130,246,0.1));border-radius:3px 3px 0 0;opacity:0.6;transition:opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'"></div>
+                <div style="flex:1;height:50%;background:linear-gradient(180deg,rgba(59,130,246,0.5),rgba(59,130,246,0.1));border-radius:3px 3px 0 0;opacity:0.6;transition:opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'"></div>
+                <div style="flex:1;height:90%;background:linear-gradient(180deg,rgba(59,130,246,0.5),rgba(59,130,246,0.1));border-radius:3px 3px 0 0;opacity:0.6;transition:opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'"></div>
+                <div style="flex:1;height:65%;background:linear-gradient(180deg,rgba(59,130,246,0.5),rgba(59,130,246,0.1));border-radius:3px 3px 0 0;opacity:0.6;transition:opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'"></div>
+                <div style="flex:1;height:75%;background:linear-gradient(180deg,rgba(59,130,246,0.5),rgba(59,130,246,0.1));border-radius:3px 3px 0 0;opacity:0.6;transition:opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'"></div>
+                <div style="flex:1;height:45%;background:linear-gradient(180deg,rgba(59,130,246,0.5),rgba(59,130,246,0.1));border-radius:3px 3px 0 0;opacity:0.6;transition:opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'"></div>
+                <div style="flex:1;height:80%;background:linear-gradient(180deg,rgba(59,130,246,0.5),rgba(59,130,246,0.1));border-radius:3px 3px 0 0;opacity:0.6;transition:opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'"></div>
+            </div>
+            <div class="flex items-center justify-between">
+                <span style="font-size:11px; color:var(--text-muted);">Last 12 periods</span>
+                <span class="badge badge-info">↑ Trending</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Anomaly rate -->
+    <div class="card animate-in delay-3" style="padding:0; overflow:hidden;">
+        <div class="flex items-center justify-between" style="
+            padding:14px 18px; border-bottom:1px solid var(--border);
+            background:rgba(255,255,255,0.01);
+        ">
+            <span class="section-title">Anomaly Rate</span>
+            <span class="badge badge-neutral">Preview</span>
+        </div>
+        <div style="padding:20px;">
+            <div style="display:flex; align-items:flex-end; gap:4px; height:80px; margin-bottom:12px;">
+                <div style="flex:1;height:20%;background:linear-gradient(180deg,rgba(239,68,68,0.5),rgba(239,68,68,0.1));border-radius:3px 3px 0 0;opacity:0.6;transition:opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'"></div>
+                <div style="flex:1;height:15%;background:linear-gradient(180deg,rgba(239,68,68,0.5),rgba(239,68,68,0.1));border-radius:3px 3px 0 0;opacity:0.6;transition:opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'"></div>
+                <div style="flex:1;height:30%;background:linear-gradient(180deg,rgba(239,68,68,0.5),rgba(239,68,68,0.1));border-radius:3px 3px 0 0;opacity:0.6;transition:opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'"></div>
+                <div style="flex:1;height:10%;background:linear-gradient(180deg,rgba(239,68,68,0.5),rgba(239,68,68,0.1));border-radius:3px 3px 0 0;opacity:0.6;transition:opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'"></div>
+                <div style="flex:1;height:45%;background:linear-gradient(180deg,rgba(239,68,68,0.5),rgba(239,68,68,0.1));border-radius:3px 3px 0 0;opacity:0.6;transition:opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'"></div>
+                <div style="flex:1;height:20%;background:linear-gradient(180deg,rgba(239,68,68,0.5),rgba(239,68,68,0.1));border-radius:3px 3px 0 0;opacity:0.6;transition:opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'"></div>
+                <div style="flex:1;height:60%;background:linear-gradient(180deg,rgba(239,68,68,0.5),rgba(239,68,68,0.1));border-radius:3px 3px 0 0;opacity:0.6;transition:opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'"></div>
+                <div style="flex:1;height:25%;background:linear-gradient(180deg,rgba(239,68,68,0.5),rgba(239,68,68,0.1));border-radius:3px 3px 0 0;opacity:0.6;transition:opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'"></div>
+                <div style="flex:1;height:15%;background:linear-gradient(180deg,rgba(239,68,68,0.5),rgba(239,68,68,0.1));border-radius:3px 3px 0 0;opacity:0.6;transition:opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'"></div>
+                <div style="flex:1;height:35%;background:linear-gradient(180deg,rgba(239,68,68,0.5),rgba(239,68,68,0.1));border-radius:3px 3px 0 0;opacity:0.6;transition:opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'"></div>
+                <div style="flex:1;height:50%;background:linear-gradient(180deg,rgba(239,68,68,0.5),rgba(239,68,68,0.1));border-radius:3px 3px 0 0;opacity:0.6;transition:opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'"></div>
+                <div style="flex:1;height:20%;background:linear-gradient(180deg,rgba(239,68,68,0.5),rgba(239,68,68,0.1));border-radius:3px 3px 0 0;opacity:0.6;transition:opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'"></div>
+            </div>
+            <div class="flex items-center justify-between">
+                <span style="font-size:11px; color:var(--text-muted);">Last 12 periods</span>
+                <span class="badge badge-warning">⚠ Monitor</span>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ── UPCOMING FEATURES ─────────────────────────────────────────────── -->
+<div class="card animate-in delay-4" style="padding:0; overflow:hidden;">
+    <div style="padding:14px 18px; border-bottom:1px solid var(--border); background:rgba(255,255,255,0.01);">
+        <span class="section-title">Planned Features</span>
+    </div>
+    <div style="padding:8px 0;">
+
+        <div class="flex items-center gap-3" style="padding:11px 18px; border-bottom:1px solid var(--border-subtle); transition:background 0.12s ease;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
+            <div style="width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><div style="width:6px;height:6px;border-radius:50%;background:var(--accent);opacity:0.5;"></div></div>
+            <span style="font-size:13.5px; color:var(--text-secondary);">Real-time request volume chart</span>
+            <span class="badge badge-neutral" style="margin-left:auto;">Soon</span>
+        </div>
+
+        <div class="flex items-center gap-3" style="padding:11px 18px; border-bottom:1px solid var(--border-subtle); transition:background 0.12s ease;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
+            <div style="width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><div style="width:6px;height:6px;border-radius:50%;background:var(--accent);opacity:0.5;"></div></div>
+            <span style="font-size:13.5px; color:var(--text-secondary);">User trust score distribution</span>
+            <span class="badge badge-neutral" style="margin-left:auto;">Soon</span>
+        </div>
+
+        <div class="flex items-center gap-3" style="padding:11px 18px; border-bottom:1px solid var(--border-subtle); transition:background 0.12s ease;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
+            <div style="width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><div style="width:6px;height:6px;border-radius:50%;background:var(--accent);opacity:0.5;"></div></div>
+            <span style="font-size:13.5px; color:var(--text-secondary);">Anomaly heatmap by hour</span>
+            <span class="badge badge-neutral" style="margin-left:auto;">Soon</span>
+        </div>
+
+        <div class="flex items-center gap-3" style="padding:11px 18px; border-bottom:1px solid var(--border-subtle); transition:background 0.12s ease;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
+            <div style="width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><div style="width:6px;height:6px;border-radius:50%;background:var(--accent);opacity:0.5;"></div></div>
+            <span style="font-size:13.5px; color:var(--text-secondary);">Model latency percentiles (p50 / p95 / p99)</span>
+            <span class="badge badge-neutral" style="margin-left:auto;">Soon</span>
+        </div>
+
+        <div class="flex items-center gap-3" style="padding:11px 18px; border-bottom:1px solid var(--border-subtle); transition:background 0.12s ease;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
+            <div style="width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><div style="width:6px;height:6px;border-radius:50%;background:var(--accent);opacity:0.5;"></div></div>
+            <span style="font-size:13.5px; color:var(--text-secondary);">Geographic request distribution</span>
+            <span class="badge badge-neutral" style="margin-left:auto;">Soon</span>
+        </div>
+
+        <div class="flex items-center gap-3" style="padding:11px 18px; transition:background 0.12s ease;" onmouseover="this.style.background='rgba(255,255,255,0.02)'" onmouseout="this.style.background='transparent'">
+            <div style="width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;"><div style="width:6px;height:6px;border-radius:50%;background:var(--accent);opacity:0.5;"></div></div>
+            <span style="font-size:13.5px; color:var(--text-secondary);">Top flagged endpoints breakdown</span>
+            <span class="badge badge-neutral" style="margin-left:auto;">Soon</span>
+        </div>
+
+    </div>
+</div>
+
+<style>
+    @keyframes progress-shimmer {
+        0%   { opacity:1; }
+        50%  { opacity:0.6; }
+        100% { opacity:1; }
+    }
+    .range-btn:hover {
+        background: rgba(255,255,255,0.05) !important;
+        color: var(--text-primary) !important;
+    }
+    .range-active {
+        background: var(--bg-elevated) !important;
+        color: var(--text-primary) !important;
+    }
+</style>
+
+<script>
+    function setRange(btn) {
+        document.querySelectorAll('.range-btn').forEach(b => {
+            b.style.background = 'transparent';
+            b.style.color = 'var(--text-muted)';
+        });
+        btn.style.background = 'var(--bg-elevated)';
+        btn.style.color = 'var(--text-primary)';
+    }
+</script>
+
+{% endblock %}

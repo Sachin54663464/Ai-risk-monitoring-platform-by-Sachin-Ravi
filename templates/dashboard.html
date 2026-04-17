@@ -1,0 +1,488 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- ── PAGE HEADER ──────────────────────────────────────────────────── -->
+<div class="flex items-center justify-between mb-6 animate-in">
+    <div>
+        <h1 class="page-title">Dashboard</h1>
+        <p class="page-subtitle">Real-time overview of your AI system activity</p>
+    </div>
+    <div class="flex items-center gap-2">
+        <div class="topbar-chip">
+            <span class="dot"></span>
+            Live updates
+        </div>
+        <button class="btn btn-secondary btn-sm" data-loading="1200"
+                onclick="triggerRefresh(this)">
+            <span class="btn-icon">↻</span> Refresh
+        </button>
+        <button class="btn btn-primary btn-sm" data-loading="1800">
+            <span class="btn-icon">⤓</span> Export
+        </button>
+    </div>
+</div>
+
+<!-- ── STAT CARDS ───────────────────────────────────────────────────── -->
+<div class="grid-3 mb-6" id="stat-grid">
+
+    <!-- Users — skeleton shown until data confirmed present -->
+    <div class="stat-card animate-in delay-1" id="card-users">
+
+        <!-- Skeleton layer (hidden once data loads) -->
+        <div class="stat-skeleton" id="skel-users">
+            <div class="skeleton skeleton-text mb-3" style="width:55%"></div>
+            <div class="skeleton skeleton-value"></div>
+            <div class="skeleton skeleton-badge"></div>
+        </div>
+
+        <!-- Real content -->
+        <div class="stat-content" id="content-users" style="display:none;">
+            <div class="flex items-center justify-between mb-4">
+                <span class="label-xs">Total Users</span>
+                <div class="stat-icon stat-icon-blue">👤</div>
+            </div>
+            <div class="stat-value" id="val-users">{{ user_count }}</div>
+            <div class="flex items-center gap-2 mt-3">
+                <span class="badge badge-info">Active</span>
+                <span style="font-size:11.5px; color:var(--text-muted);">registered accounts</span>
+            </div>
+        </div>
+
+        <div class="accent-bar" style="background:linear-gradient(90deg,var(--accent),transparent);"></div>
+    </div>
+
+    <!-- Requests -->
+    <div class="stat-card animate-in delay-2" id="card-requests">
+
+        <div class="stat-skeleton" id="skel-requests">
+            <div class="skeleton skeleton-text mb-3" style="width:62%"></div>
+            <div class="skeleton skeleton-value"></div>
+            <div class="skeleton skeleton-badge"></div>
+        </div>
+
+        <div class="stat-content" id="content-requests" style="display:none;">
+            <div class="flex items-center justify-between mb-4">
+                <span class="label-xs">Total Requests</span>
+                <div class="stat-icon stat-icon-teal">⚡</div>
+            </div>
+            <div class="stat-value" id="val-requests">{{ request_count }}</div>
+            <div class="flex items-center gap-2 mt-3">
+                <span class="badge badge-success">Healthy</span>
+                <span style="font-size:11.5px; color:var(--text-muted);">api calls processed</span>
+            </div>
+        </div>
+
+        <div class="accent-bar" style="background:linear-gradient(90deg,var(--teal),transparent);"></div>
+    </div>
+
+    <!-- Anomalies -->
+    <div class="stat-card animate-in delay-3" id="card-anomalies">
+
+        <div class="stat-skeleton" id="skel-anomalies">
+            <div class="skeleton skeleton-text mb-3" style="width:48%"></div>
+            <div class="skeleton skeleton-value"></div>
+            <div class="skeleton skeleton-badge"></div>
+        </div>
+
+        <div class="stat-content" id="content-anomalies" style="display:none;">
+            <div class="flex items-center justify-between mb-4">
+                <span class="label-xs">Anomalies</span>
+                <div class="stat-icon stat-icon-red">⚠</div>
+            </div>
+            <div class="stat-value stat-value-red" id="val-anomalies">{{ anomaly_count }}</div>
+            <div class="flex items-center gap-2 mt-3">
+                <span class="badge badge-danger">Alert</span>
+                <span style="font-size:11.5px; color:var(--text-muted);">detected anomalies</span>
+            </div>
+        </div>
+
+        <div class="accent-bar" style="background:linear-gradient(90deg,var(--red),transparent);"></div>
+    </div>
+
+</div>
+
+<!-- ── SYSTEM STATUS PANEL ──────────────────────────────────────────── -->
+<div class="card animate-in delay-4" style="padding:0; overflow:hidden;">
+
+    <!-- Card header -->
+    <div class="flex items-center justify-between" style="
+        padding:16px 20px;
+        border-bottom:1px solid var(--border);
+        background:rgba(255,255,255,0.012);
+    ">
+        <div class="flex items-center gap-3">
+            <span class="section-title">System Status</span>
+            <span class="badge badge-success">Operational</span>
+        </div>
+        <div class="flex items-center gap-2">
+            <span style="font-size:11.5px; color:var(--text-muted);" id="last-checked">
+                Last checked just now
+            </span>
+            <button class="btn btn-ghost btn-sm" onclick="refreshStatus(this)"
+                    style="padding:3px 8px; font-size:11px;">
+                ↻
+            </button>
+        </div>
+    </div>
+
+    <!-- Status rows -->
+    <div id="status-rows">
+
+        <div class="status-row">
+            <div class="flex items-center gap-3">
+                <span class="status-pip pip-green"></span>
+                <span class="status-row-label">AI Inference Engine</span>
+            </div>
+            <span class="badge badge-success">Online</span>
+        </div>
+
+        <div class="status-row">
+            <div class="flex items-center gap-3">
+                <span class="status-pip pip-green"></span>
+                <span class="status-row-label">Request Pipeline</span>
+            </div>
+            <span class="badge badge-success">Online</span>
+        </div>
+
+        <div class="status-row">
+            <div class="flex items-center gap-3">
+                <span class="status-pip pip-amber"></span>
+                <span class="status-row-label">Anomaly Detection</span>
+            </div>
+            <span class="badge badge-warning">Monitoring</span>
+        </div>
+
+        <div class="status-row" style="border-bottom:none;">
+            <div class="flex items-center gap-3">
+                <span class="status-pip pip-green"></span>
+                <span class="status-row-label">Log Ingestion</span>
+            </div>
+            <span class="badge badge-success">Online</span>
+        </div>
+
+    </div>
+
+    <!-- Mini uptime bar footer -->
+    <div style="
+        padding:10px 20px 14px;
+        border-top:1px solid var(--border-subtle);
+        display:flex; align-items:center; gap:12px;
+    ">
+        <span style="font-size:11px; color:var(--text-muted); white-space:nowrap;">
+            30-day uptime
+        </span>
+        <div style="flex:1; display:flex; gap:2px; align-items:center;">
+            <!-- 30 uptime blocks -->
+            <div class="uptime-blocks" id="uptime-blocks"></div>
+        </div>
+        <span style="
+            font-size:11px; font-weight:600;
+            color:var(--green); white-space:nowrap;
+        ">99.8%</span>
+    </div>
+
+</div>
+
+<!-- ── DASHBOARD STYLES ──────────────────────────────────────────────── -->
+<style>
+    /* ── Stat card icon ─────────────────────── */
+    .stat-icon {
+        width: 32px; height: 32px;
+        border-radius: 8px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 14px;
+        flex-shrink: 0;
+        transition: transform var(--t-base) var(--ease-spring),
+                    box-shadow var(--t-base) var(--ease-out);
+    }
+
+    .stat-card:hover .stat-icon {
+        transform: scale(1.1) rotate(-4deg);
+    }
+
+    .stat-icon-blue {
+        background: rgba(59,130,246,0.12);
+        border: 1px solid rgba(59,130,246,0.22);
+        box-shadow: 0 0 10px rgba(59,130,246,0.08);
+    }
+
+    .stat-icon-teal {
+        background: rgba(20,184,166,0.12);
+        border: 1px solid rgba(20,184,166,0.22);
+        box-shadow: 0 0 10px rgba(20,184,166,0.08);
+    }
+
+    .stat-icon-red {
+        background: rgba(239,68,68,0.12);
+        border: 1px solid rgba(239,68,68,0.22);
+        box-shadow: 0 0 10px rgba(239,68,68,0.08);
+    }
+
+    .stat-card:hover .stat-icon-blue { box-shadow: 0 0 18px rgba(59,130,246,0.22); }
+    .stat-card:hover .stat-icon-teal { box-shadow: 0 0 18px rgba(20,184,166,0.22); }
+    .stat-card:hover .stat-icon-red  { box-shadow: 0 0 18px rgba(239,68,68,0.22); }
+
+    /* ── Stat value ─────────────────────────── */
+    .stat-value {
+        font-family: 'Syne', sans-serif;
+        font-size: 38px;
+        font-weight: 700;
+        color: var(--text-primary);
+        letter-spacing: -0.04em;
+        line-height: 1;
+        margin-bottom: 2px;
+        transition: transform var(--t-base) var(--ease-spring);
+    }
+
+    .stat-card:hover .stat-value { transform: scale(1.03); }
+
+    .stat-value-red { color: #f87171; }
+
+    /* ── Stat skeleton ──────────────────────── */
+    .stat-skeleton { padding: 2px 0 6px; }
+
+    .stat-content {
+        animation: fade-up 0.32s var(--ease-out) both;
+    }
+
+    /* ── Status rows ────────────────────────── */
+    .status-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 20px;
+        border-bottom: 1px solid var(--border-subtle);
+        transition: background var(--t-fast) var(--ease-out),
+                    padding-left var(--t-base) var(--ease-out);
+        cursor: default;
+    }
+
+    .status-row:hover {
+        background: rgba(255,255,255,0.022);
+        padding-left: 24px;
+    }
+
+    .status-row-label {
+        font-size: 13.5px;
+        color: var(--text-primary);
+        font-weight: 450;
+    }
+
+    /* ── Status pips ────────────────────────── */
+    .status-pip {
+        width: 7px; height: 7px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    .pip-green {
+        background: var(--green);
+        box-shadow: 0 0 0 0 var(--green-glow);
+        animation: pip-pulse 3s var(--ease-out) infinite;
+    }
+
+    .pip-amber {
+        background: var(--amber);
+        box-shadow: 0 0 5px var(--amber-glow);
+    }
+
+    .pip-red {
+        background: var(--red);
+        box-shadow: 0 0 5px var(--red-glow);
+    }
+
+    @keyframes pip-pulse {
+        0%   { box-shadow: 0 0 0 0   rgba(16,185,129,0.55); }
+        65%  { box-shadow: 0 0 0 5px rgba(16,185,129,0); }
+        100% { box-shadow: 0 0 0 0   rgba(16,185,129,0); }
+    }
+
+    /* ── Uptime blocks ──────────────────────── */
+    .uptime-blocks {
+        display: flex;
+        gap: 2px;
+        align-items: center;
+        width: 100%;
+    }
+
+    .uptime-block {
+        flex: 1;
+        height: 20px;
+        border-radius: 3px;
+        transition: transform var(--t-fast) var(--ease-out),
+                    filter var(--t-fast) var(--ease-out);
+        cursor: default;
+    }
+
+    .uptime-block:hover {
+        transform: scaleY(1.25);
+        filter: brightness(1.3);
+    }
+
+    .uptime-block.up      { background: rgba(16,185,129,0.55); }
+    .uptime-block.partial { background: rgba(245,158,11,0.55); }
+    .uptime-block.down    { background: rgba(239,68,68,0.55);  }
+
+    /* ── Count-up number animation ──────────── */
+    @keyframes count-pop {
+        0%   { transform: scale(0.85); opacity: 0; }
+        60%  { transform: scale(1.06); }
+        100% { transform: scale(1);    opacity: 1; }
+    }
+
+    .count-pop {
+        animation: count-pop 0.45s var(--ease-spring) both;
+    }
+</style>
+
+<!-- ── DASHBOARD SCRIPTS ─────────────────────────────────────────────── -->
+<script>
+(function () {
+    'use strict';
+
+    /* ── Skeleton → real content reveal ─────────────────────────── */
+    const cards = [
+        { skel: 'skel-users',     content: 'content-users' },
+        { skel: 'skel-requests',  content: 'content-requests' },
+        { skel: 'skel-anomalies', content: 'content-anomalies' },
+    ];
+
+    function revealCards() {
+        cards.forEach(({ skel, content }, i) => {
+            setTimeout(() => {
+                const s = document.getElementById(skel);
+                const c = document.getElementById(content);
+                if (!s || !c) return;
+
+                // Fade out skeleton
+                s.style.transition = 'opacity 0.2s ease';
+                s.style.opacity = '0';
+
+                setTimeout(() => {
+                    s.style.display = 'none';
+                    c.style.display = 'block';
+                    c.classList.add('count-pop');
+
+                    // Animate the number counting up
+                    const valEl = c.querySelector('.stat-value');
+                    if (valEl) animateCount(valEl);
+                }, 200);
+
+            }, 320 + i * 110);
+        });
+    }
+
+    /* ── Count-up animation ─────────────────────────────────────── */
+    function animateCount(el) {
+        const target = parseInt(el.textContent, 10);
+        if (isNaN(target) || target === 0) return;
+
+        const duration = 700;
+        const startTime = performance.now();
+        const startVal = 0;
+
+        function step(now) {
+            const elapsed = now - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            // Ease-out expo
+            const eased = 1 - Math.pow(1 - progress, 3);
+            el.textContent = Math.round(startVal + (target - startVal) * eased);
+            if (progress < 1) requestAnimationFrame(step);
+        }
+
+        requestAnimationFrame(step);
+    }
+
+    /* ── Refresh button handler ─────────────────────────────────── */
+    window.triggerRefresh = function (btn) {
+        // Re-show skeletons briefly for visual feedback
+        cards.forEach(({ skel, content }) => {
+            const s = document.getElementById(skel);
+            const c = document.getElementById(content);
+            if (!s || !c) return;
+            c.style.display = 'none';
+            s.style.opacity = '1';
+            s.style.display = 'block';
+        });
+
+        // Update last-checked text
+        const lc = document.getElementById('last-checked');
+        if (lc) lc.textContent = 'Refreshing…';
+
+        setTimeout(() => {
+            revealCards();
+            if (lc) lc.textContent = 'Last checked just now';
+        }, 900);
+    };
+
+    /* ── Status refresh hint ────────────────────────────────────── */
+    window.refreshStatus = function (btn) {
+        const lc = document.getElementById('last-checked');
+        if (lc) {
+            lc.textContent = 'Checking…';
+            setTimeout(() => lc.textContent = 'Last checked just now', 900);
+        }
+        btn.style.transform = 'rotate(360deg)';
+        btn.style.transition = 'transform 0.5s ease';
+        setTimeout(() => {
+            btn.style.transform = '';
+            btn.style.transition = '';
+        }, 500);
+    };
+
+    /* ── Uptime blocks generator ────────────────────────────────── */
+    function buildUptime() {
+        const container = document.getElementById('uptime-blocks');
+        if (!container) return;
+
+        // 30 days — mostly up, one partial, all green for demo
+        const states = Array.from({ length: 30 }, (_, i) => {
+            if (i === 14) return 'partial';
+            return 'up';
+        });
+
+        states.forEach((state, i) => {
+            const block = document.createElement('div');
+            block.className = `uptime-block ${state}`;
+            block.title = `Day ${i + 1}: ${state === 'up' ? 'Operational' : state === 'partial' ? 'Degraded' : 'Outage'}`;
+            // Staggered entrance
+            block.style.opacity = '0';
+            block.style.transform = 'scaleY(0.4)';
+            block.style.transition = `opacity 0.2s ease ${i * 18}ms, transform 0.25s var(--ease-spring) ${i * 18}ms`;
+            container.appendChild(block);
+
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    block.style.opacity = '1';
+                    block.style.transform = 'scaleY(1)';
+                });
+            });
+        });
+    }
+
+    /* ── Last-checked live clock ────────────────────────────────── */
+    function startCheckedTimer() {
+        let seconds = 0;
+        const el = document.getElementById('last-checked');
+        setInterval(() => {
+            seconds++;
+            if (!el) return;
+            if (seconds < 60) {
+                el.textContent = seconds <= 5
+                    ? 'Last checked just now'
+                    : `Last checked ${seconds}s ago`;
+            } else {
+                el.textContent = `Last checked ${Math.floor(seconds / 60)}m ago`;
+            }
+        }, 1000);
+    }
+
+    /* ── Init ───────────────────────────────────────────────────── */
+    revealCards();
+    buildUptime();
+    startCheckedTimer();
+
+})();
+</script>
+
+{% endblock %}
