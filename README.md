@@ -1,81 +1,66 @@
-# 🧠 AI Risk Monitoring & Anomaly Detection Platform
+# 🛡️ AI Risk Monitoring Platform
 
-> A system designed to detect suspicious behavior, flag anomalies, and provide real-time risk insights through an analytics-driven dashboard.
-
----
-
-## 🚨 The Problem
-
-Most systems **react after damage is done**.
-There’s no early detection of:
-
-* Duplicate or spam actions
-* Sudden activity spikes
-* Suspicious user behavior
-
-This leads to **fraud, misuse, and poor system trust**.
+> A backend-focused REST API project built with Django and Django REST Framework to detect suspicious user activity, identify anomalies, calculate risk, and provide real-time monitoring through an analytics dashboard.
 
 ---
 
-## 💡 The Solution
+## 🚀 Overview
 
-This project introduces a **real-time risk monitoring system** that:
+This project simulates a real-world risk monitoring system used to identify suspicious user behavior before it becomes a security issue.
 
-* Identifies abnormal patterns
-* Flags suspicious users
-* Logs anomalies for investigation
-* Visualizes system health via dashboard
-
-👉 Built with a focus on **clarity, scalability, and structured backend logic**
+The backend processes user activity, detects anomalies, stores risk information in the database, and exposes the data through REST APIs. A lightweight dashboard consumes these APIs to display analytics and system insights.
 
 ---
 
-⚙️ Core Capabilities
+## ✨ Features
 
-🔍 Anomaly Detection Engine
-
-* Detects **duplicate actions**
-* Identifies **burst activity patterns**
-* Flags abnormal behavior in real-time
-
-📊 Analytics Dashboard
-
-* Visual representation of:
-
-  * Activity trends
-  * Risk scores
-  * System insights
-
-⚠️ Risk Flagging System
-
-* Marks users as **suspicious**
-* Tracks review status
-* Enables admin-level decisions
-
-### 🧾 Logs & Investigation Panel
-
-* Stores all anomaly events
-* Enables structured investigation
+- 🔍 Detects duplicate and suspicious user activities
+- 📈 Identifies unusual activity spikes
+- ⚠️ Assigns risk levels to suspicious users
+- 📝 Stores anomaly logs for investigation
+- 📊 Displays real-time analytics on a dashboard
+- 🔗 REST APIs for accessing monitoring data
 
 ---
 
-## 🏗️ Architecture & Tech Stack
+## 🏗️ Tech Stack
 
-**Backend:** Django, Django REST Framework
-**Frontend:** HTML, CSS, JavaScript
-**Database:** SQLite
-**Version Control:** Git & GitHub
+**Backend**
+- Django
+- Django REST Framework (DRF)
+
+**Frontend**
+- HTML
+- CSS
+- JavaScript
+
+**Database**
+- SQLite
+
+**Version Control**
+- Git & GitHub
 
 ---
 
 ## 📂 Project Structure
 
-```bash
-core/           # Business logic (models, views, anomaly detection)
-templates/      # UI (dashboard, logs, analytics)
-static/         # CSS & JS
-myproject/      # Config & routing
+```text
+core/           # Models, APIs, business logic, anomaly detection
+myproject/      # Django configuration and routing
+templates/      # Dashboard UI
+static/         # CSS and JavaScript
+manage.py
 ```
+
+---
+
+## ⚙️ Backend Responsibilities
+
+- Build REST APIs using Django REST Framework
+- Process user activity and detect anomalies
+- Perform CRUD operations on risk records
+- Store monitoring data in SQLite
+- Serve analytics data to the dashboard
 
 ---
 
@@ -83,13 +68,38 @@ myproject/      # Config & routing
 
 ```bash
 git clone https://github.com/Sachin54663464/Ai-risk-monitoring-platform-by-Sachin-Ravi.git
+
 cd Ai-risk-monitoring-platform-by-Sachin-Ravi
+
 pip install django djangorestframework
+
 python manage.py runserver
 ```
 
-Visit: http://127.0.0.1:8000/
+Open your browser and visit:
 
+```
+http://127.0.0.1:8000/
+```
+
+---
+
+## 🎯 What I Learned
+
+- Backend development with Django
+- REST API development using Django REST Framework
+- Database integration with SQLite
+- CRUD operations
+- Business logic implementation
+- API-driven application architecture
+
+---
+
+## 👨‍💻 Author
+
+**Sachin Ravi**
+
+Computer Science Engineering Student | Backend & AI Developer
 
 
 📸 Product Preview
